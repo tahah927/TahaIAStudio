@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_from_directory
-from moviepy.editor import TextClip, CompositeVideoClip
+from moviepy import TextClip, CompositeVideoClip
 import os
 
 app = Flask(__name__)
