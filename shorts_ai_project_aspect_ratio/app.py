@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from moviepy.editor import TextClip
+from moviepy import TextClip
 import os
 import uuid
 
