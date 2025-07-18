@@ -1,0 +1,26 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generador de Vídeos</title>
+</head>
+<body>
+  <h1>Generador de vídeos con IA</h1>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="text" name="texto" placeholder="Texto para el video" required>
+    <select name="formato">
+      <option value="cuadrado">Cuadrado</option>
+      <option value="horizontal">Horizontal</option>
+      <option value="vertical">Vertical</option>
+    </select>
+    <button type="submit">Generar</button>
+  </form>
+
+  {% if generado %}
+    <p>✅ Video generado con éxito</p>
+    <video controls width="300">
+      <source src="{{ generado }}" type="video/mp4">
+    </video>
+  {% endif %}
+</body>
+</html>
