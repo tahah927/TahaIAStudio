@@ -1,52 +1,36 @@
-from flask import Flask, render_template, request, send_from_directory
-from moviepy import TextClip, CompositeVideoClip
+from flask import Flask, render_template, request, send_file
+from moviepy.editor import TextClip, CompositeVideoClip
 import os
+import uuid
 
 app = Flask(__name__)
 
-def crear_video(tema, formato="mp4", duracion=15, aspecto="9:16"):
-    os.makedirs("static", exist_ok=True)
-
-    if aspecto == "9:16":
-        width, height = 480, 854
-    elif aspecto == "16:9":
-        width, height = 854, 480
-    elif aspecto == "1:1":
-        width, height = 640, 640
-    else:
-        width, height = 480, 854
-
-    texto = f"Tema: {tema}"
-    txt_clip = TextClip(txt=texto, fontsize=40, color='white', size=(width, height), method='caption', bg_color='black')
-    txt_clip = txt_clip.set_duration(duracion)
-
-    video = CompositeVideoClip([txt_clip])
-
-    ruta = f"static/video_short.{formato}"
-    video.write_videofile(ruta, fps=24, codec='libx264', audio=False)
-
-    return ruta
-
+# Ruta para la página principal
 @app.route("/", methods=["GET", "POST"])
 def index():
     generado = False
-    formato = "mp4"
+    nombre_video = ""
+
     if request.method == "POST":
-        tema = request.form.get("tema")
-        formato = request.form.get("formato", "mp4")
-        duracion = int(request.form.get("duracion", 15))
-        aspecto = request.form.get("aspecto", "9:16")
+        texto = request.form.get("texto", "Texto de ejemplo")
+        nombre_video = f"{uuid.uuid4().hex}.mp4"
 
-        if tema:
-            crear_video(tema, formato=formato, duracion=duracion, aspecto=aspecto)
-            generado = True
+        # Crear clip de texto
+        clip = TextClip(texto, fontsize=70, color='white', size=(1280, 720))
+        clip = clip.set_duration(5).set_position("center").on_color(color=(0, 0, 0))
 
-    return render_template("index.html", generado=generado, formato=formato)
+        # Guardar el video
+        output_path = os.path.join("static", nombre_video)
+        clip.write_videofile(output_path, fps=24)
 
-@app.route("/video")
-def video():
-    formato = request.args.get("formato", "mp4")
-    return send_from_directory("static", f"video_short.{formato}")
+        generado = True
+
+    return render_template("index.html", generado=generado, video=nombre_video)
+
+# Ruta para descargar el video si se desea
+@app.route("/descargar/<nombre>")
+def descargar(nombre):
+    return send_file(os.path.join("static", nombre), as_attachment=True)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+    app.run(host="0.0.0.0", port=8080)
